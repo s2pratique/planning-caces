@@ -1,0 +1,150 @@
+// Schéma Prisma pour Planning Formations CACES
+// Base de données : PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// UTILISATEURS
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  role      UserRole @default(FORMATEUR_INTERNE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  FORMATEUR_INTERNE
+  FORMATEUR_INTERVENANT
+}
+
+// FORMATIONS (Catalogue)
+model Formation {
+  id            String   @id @default(uuid())
+  categorie     String   // CACES, ACES, Travail en Hauteur, etc.
+  sousCategorie String?  // R482, R483, SST, etc.
+  dureeJours    Int      @default(1)
+  couleur       String   @default("#3B82F6") // Couleur hexadécimale
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// LIEUX
+model Lieu {
+  id              String   @id @default(uuid())
+  nom             String
+  adresseRue      String
+  adresseCP       String
+  adresseVille    String
+  latitude        Float?
+  longitude       Float?
+  contactNom      String?
+  contactTel      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// FORMATEURS
+model Formateur {
+  id               String                    @id @default(uuid())
+  nom              String
+  prenom           String
+  email            String                    @unique
+  telephone        String
+  role             UserRole                  @default(FORMATEUR_INTERNE)
+  couleur          String                    @default("#10B981") // Couleur bulle nom
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  
+  // Relations
+  specialites      FormateurSpecialite[]
+  indisponibilites Indisponibilite[]
+  sessions         SessionFormateur[]
+}
+
+// Table de liaison Formateur ↔ Formation (spécialités)
+model FormateurSpecialite {
+  id           String     @id @default(uuid())
+  formateurId  String
+  formationId  String
+  formateur    Formateur  @relation(fields: [formateurId], references: [id], onDelete: Cascade)
+  
+  @@unique([formateurId, formationId])
+}
+
+// Indisponibilités (congés, absences)
+model Indisponibilite {
+  id          String    @id @default(uuid())
+  formateurId String
+  dateDebut   DateTime
+  dateFin     DateTime
+  motif       String?   // "Congé", "Maladie", etc.
+  formateur   Formateur @relation(fields: [formateurId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+}
+
+// SESSIONS
+model Session {
+  id                String             @id @default(uuid())
+  dateDebut         DateTime
+  dateFin           DateTime
+  dureeJours        Int                @default(1)
+  heureDebut        String             @default("08:30")
+  heureFin          String             @default("16:30")
+  
+  // Formation
+  typeFormation     String             // Ex: "CACES R482"
+  categorie         String             // CACES, ACES, etc.
+  sousCategorie     String?            // R482, R483, etc.
+  
+  // Statut
+  statut            SessionStatut      @default(CONFIRME)
+  
+  // Client
+  entreprise        String
+  contactNom        String?
+  contactTel        String?
+  contactEmail      String?
+  
+  // Lieu
+  lieu              String?
+  
+  // Série (pour sessions multi-jours)
+  serieId           String?            // UUID commun pour événements liés
+  
+  // Commentaire
+  commentaire       String?
+  
+  // Métadonnées
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  archived          Boolean            @default(false)
+  
+  // Relations
+  formateurs        SessionFormateur[]
+}
+
+enum SessionStatut {
+  CONFIRME
+  OPTION
+  ANNULE
+}
+
+// Table de liaison Session ↔ Formateur (many-to-many)
+model SessionFormateur {
+  id          String    @id @default(uuid())
+  sessionId   String
+  formateurId String
+  session     Session   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  formateur   Formateur @relation(fields: [formateurId], references: [id], onDelete: Cascade)
+  
+  @@unique([sessionId, formateurId])
+}
