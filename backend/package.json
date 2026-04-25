@@ -1,0 +1,30 @@
+{
+  "name": "planning-caces-backend",
+  "version": "1.0.0",
+  "description": "Backend API pour Planning Formations CACES",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "node --watch src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "pg": "^8.11.3",
+    "@prisma/client": "^5.9.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "express-session": "^1.18.0",
+    "nodemailer": "^6.9.8",
+    "node-cron": "^3.0.3",
+    "axios": "^1.6.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
