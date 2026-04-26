@@ -45,3 +45,23 @@
 ## 🔑 Variables d'environnement
 
 ### Backend (Railway)
+PORT=5000
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+FRONTEND_URL=https://planning-caces.vercel.app
+SESSION_SECRET=[à définir]
+NODE_ENV=production
+GOOGLE_CLIENT_ID=[à définir]
+GOOGLE_CLIENT_SECRET=[à définir]
+GOOGLE_CALLBACK_URL=https://planning-caces-production.up.railway.app/auth/google/callback
+
+### Frontend (Vercel)
+VITE_API_URL=https://planning-caces-production.up.railway.app
+VITE_GOOGLE_CLIENT_ID=[à définir]
+
+---
+
+## 📊 Dashboard
+
+- **Vercel Dashboard :** https://vercel.com/dashboard
+- **Railway Dashboard :** https://railway.app/dashboard
+- **GitHub Repository :** https://github.com/s2pratique/planning-caces
