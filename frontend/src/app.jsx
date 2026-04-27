@@ -1,99 +1,165 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useState } from 'react'
-
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import Layout from './components/layout/Layout';
+import ProtectedRoute from './utils/ProtectedRoute';
+ 
+// Pages
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import NotFound from './pages/NotFound';
+ 
 function App() {
-  const [darkMode, setDarkMode] = useState(false)
-
+  const { isAuthenticated } = useAuth();
+ 
   return (
-    <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<HomePage darkMode={darkMode} setDarkMode={setDarkMode} />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </div>
-  )
+    <Routes>
+      {/* Route publique - Login */}
+      <Route 
+        path="/login" 
+        element={
+          isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+        } 
+      />
+ 
+      {/* Routes protégées avec Layout */}
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Routes>
+                {/* Redirection racine vers dashboard */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                
+                {/* Dashboard - accessible à tous les utilisateurs authentifiés */}
+                <Route path="/dashboard" element={<Dashboard />} />
+ 
+                {/* Calendrier - accessible à tous */}
+                <Route 
+                  path="/calendrier" 
+                  element={
+                    <div className="text-center py-12">
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                        Calendrier
+                      </h1>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Module en cours de développement
+                      </p>
+                    </div>
+                  } 
+                />
+ 
+                {/* Sessions - accessible à tous */}
+                <Route 
+                  path="/sessions" 
+                  element={
+                    <div className="text-center py-12">
+                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                        Sessions
+                      </h1>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Module en cours de développement
+                      </p>
+                    </div>
+                  } 
+                />
+ 
+                {/* Formateurs - admin uniquement */}
+                <Route 
+                  path="/formateurs" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <div className="text-center py-12">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                          Formateurs
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Module en cours de développement
+                        </p>
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+ 
+                {/* Formations - admin uniquement */}
+                <Route 
+                  path="/formations" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <div className="text-center py-12">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                          Formations
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Module en cours de développement
+                        </p>
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+ 
+                {/* Lieux - admin uniquement */}
+                <Route 
+                  path="/lieux" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <div className="text-center py-12">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                          Lieux
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Module en cours de développement
+                        </p>
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+ 
+                {/* Statistiques - admin uniquement */}
+                <Route 
+                  path="/statistiques" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <div className="text-center py-12">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                          Statistiques
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Module en cours de développement
+                        </p>
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+ 
+                {/* Paramètres - admin uniquement */}
+                <Route 
+                  path="/parametres" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <div className="text-center py-12">
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                          Paramètres
+                        </h1>
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Module en cours de développement
+                        </p>
+                      </div>
+                    </ProtectedRoute>
+                  } 
+                />
+ 
+                {/* 404 - Page non trouvée */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
 }
-
-function HomePage({ darkMode, setDarkMode }) {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="max-w-2xl w-full space-y-8">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            📅 Planning Formations CACES
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
-            Application de gestion du planning - Phase 1 Setup
-          </p>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-semibold">🎯 Statut du Projet</h2>
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-            >
-              {darkMode ? '☀️ Mode clair' : '🌙 Mode sombre'}
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <StatusItem 
-              status="✅" 
-              title="Repository GitHub" 
-              description="Structure créée"
-            />
-            <StatusItem 
-              status="🚧" 
-              title="Backend" 
-              description="En cours de déploiement"
-            />
-            <StatusItem 
-              status="🚧" 
-              title="Frontend" 
-              description="En cours de déploiement"
-            />
-            <StatusItem 
-              status="⏳" 
-              title="Base de données" 
-              description="À configurer"
-            />
-            <StatusItem 
-              status="⏳" 
-              title="Authentification" 
-              description="À configurer"
-            />
-          </div>
-        </div>
-
-        <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-2">📋 Prochaines étapes</h3>
-          <ul className="space-y-2 text-gray-700 dark:text-gray-300">
-            <li>1. Déployer sur Vercel (Frontend)</li>
-            <li>2. Déployer sur Railway (Backend + DB)</li>
-            <li>3. Configurer Google OAuth</li>
-            <li>4. Développer les modules CRUD</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function StatusItem({ status, title, description }) {
-  return (
-    <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-      <span className="text-2xl">{status}</span>
-      <div>
-        <h3 className="font-semibold">{title}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
-      </div>
-    </div>
-  )
-}
-
-export default App
+ 
+export default App;
+ 
