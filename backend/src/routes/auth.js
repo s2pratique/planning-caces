@@ -1,50 +1,46 @@
-import express from 'express';
-import passport from '../config/passport.js';
-
+const express = require('express');
+const passport = require('passport');
 const router = express.Router();
 
-// Route: Initier la connexion Google OAuth
-router.get('/google', 
+// Route pour initier la connexion Google
+router.get('/google',
   passport.authenticate('google', { 
     scope: ['profile', 'email'] 
   })
 );
 
-// Route: Callback Google OAuth
+// Callback après authentification Google
 router.get('/google/callback',
   passport.authenticate('google', { 
-    failureRedirect: `${process.env.FRONTEND_URL}/login?error=auth_failed` 
+    failureRedirect: process.env.FRONTEND_URL || 'http://localhost:5173'
   }),
   (req, res) => {
-    // Authentification réussie, rediriger vers le frontend
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    // Succès : redirection vers le frontend avec le token
+    const token = req.user.token;
+    const redirectUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/auth/callback?token=${token}`;
+    res.redirect(redirectUrl);
   }
 );
 
-// Route: Récupérer l'utilisateur connecté
-router.get('/me', (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({ 
-      user: {
-        id: req.user.id,
-        email: req.user.email,
-        name: req.user.name,
-        role: req.user.role,
-      }
+// Route pour récupérer l'utilisateur connecté
+router.get('/me', 
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.json({
+      id: req.user.id,
+      email: req.user.email,
+      nom: req.user.nom,
+      prenom: req.user.prenom,
+      role: req.user.role
     });
-  } else {
-    res.status(401).json({ error: 'Non authentifié' });
   }
-});
+);
 
-// Route: Déconnexion
+// Route de déconnexion
 router.post('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({ error: 'Erreur lors de la déconnexion' });
-    }
+  req.logout(() => {
     res.json({ message: 'Déconnexion réussie' });
   });
 });
 
-export default router;
+module.exports = router;
